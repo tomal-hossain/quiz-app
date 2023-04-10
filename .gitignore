@@ -1,0 +1,7 @@
+API/Domain/bin/
+API/Domain/obj/
+API/QuizAPI/bin/
+API/QuizAPI/obj/
+API/Service/obj/
+API/Service/bin/
+API/QuizAPI/.vs/
