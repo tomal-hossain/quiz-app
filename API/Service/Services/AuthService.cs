@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Service.Dto;
+using Service.Helper;
 
 namespace Service.Services
 {
@@ -103,12 +104,13 @@ namespace Service.Services
 
         private string CreateToken(ApplicationUser user, IList<string> userRoles)
         {
+            bool isAdmin = userRoles.Any(r => string.Equals(r, UserRole.Admin));
             var authClaims = new List<Claim>
-            {
-                        new Claim(ClaimTypes.Email, user.Email),
-                        new Claim(ClaimTypes.NameIdentifier, user.Id),
-                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    };
+                {
+                    new Claim(AppClaim.Name, user.Name),
+                    new Claim(AppClaim.UserId, user.Id),
+                    new Claim(AppClaim.IsAdmin, isAdmin.ToString())
+                };
 
             foreach (var userRole in userRoles)
             {

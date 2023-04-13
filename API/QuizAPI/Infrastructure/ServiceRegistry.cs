@@ -50,7 +50,8 @@ namespace QuizAPI.Infrastructure
                    });
             services.AddAutoMapper(typeof(ModelMapper));
 
-            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IAuthService, AuthService>()
+                    .AddScoped<IAdminService, AdminService>();
 
             return services;
         }

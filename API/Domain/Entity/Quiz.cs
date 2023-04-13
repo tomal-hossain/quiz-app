@@ -6,6 +6,7 @@
         {
             AccessIdentifier = Guid.NewGuid().ToString();
             IsActive = true;
+            CreationDate = DateTime.Now;
         }
 
         public string AccessIdentifier { get; set; }
