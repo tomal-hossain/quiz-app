@@ -1,16 +1,42 @@
-import { Button, Form, Input } from 'antd';
+import { Button, Form, Input, Alert } from 'antd';
 import { useState } from 'react';
+import { Link, useNavigate } from "react-router-dom";
+import axios from 'axios';
+import { setUserSession } from '../Util/Common';
 
 const Register = () => {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const onFinish = (values) => {
     setLoading(true);
+    setError(null);
+    axios.post('https://localhost:44394/api/auth/register',
+    {
+      name: values.name,
+      email: values.email,
+      password: values.password,
+      confirmPassword: values.confirmPassword
+    })
+    .then(response => {
+      setLoading(false);
+      setUserSession(response.data.token, response.data.user);
+      navigate("/");
+    })
+    .catch(error => {
+      setLoading(false);
+      if (error.response && error.response.status === 400)
+        setError(error.response.data.message);
+      else
+        setError("Something went wrong. Please try again later.");
+    });
   };
 
   return (
     <Form
       name="login"
+      className='text-center'
       labelCol={{
         span: 8,
       }}
@@ -28,6 +54,30 @@ const Register = () => {
       autoComplete="off"
     >
       <h3>Register</h3>
+
+      {error && <Alert message={error} type="error" className='mb-2' />}
+
+      <Form.Item
+        label="Name"
+        name="name"
+        rules={[
+          {
+            required: true,
+            message: 'Name is required!',
+          },
+          {
+            min: 3,
+            message: 'Name should be minimum 3 characters long',
+          },
+          {
+            max: 50,
+            message: 'Name should be maximum 50 characters long',
+          }
+        ]}
+      >
+        <Input />
+      </Form.Item>
+
       <Form.Item
         label="Email"
         name="email"
@@ -98,6 +148,10 @@ const Register = () => {
           Register
         </Button>
       </Form.Item>
+
+      <div className='text-center'>
+        <Link to="/login">Already have an account? Login</Link>
+      </div>
     </Form>
   )
 };

@@ -40,11 +40,13 @@ namespace Service.Services
                 {
                     var userRoles = await _userManager.GetRolesAsync(user);
 
-                    var token = CreateToken(user, userRoles);
+                    bool isAdmin = userRoles.Any(r => string.Equals(r, UserRole.Admin));
 
-                    return new Result { StatusCode = 200, Body = new { Token = token } };
+                    var token = CreateToken(user, userRoles, isAdmin);
+
+                    return new Result { StatusCode = 200, Body = new { Token = token, User = new { UserId = user.Id, user.Name, IsAdmin = isAdmin } } };
                 }
-                return new Result { StatusCode = 404, Body = new { Message = "Username or Password doesn't match" } };
+                return new Result { StatusCode = 400, Body = new { Message = "Username or Password doesn't match" } };
             }
             catch (Exception ex)
             {
@@ -85,8 +87,8 @@ namespace Service.Services
                 if (result.Succeeded)
                 {
                     await _userManager.AddToRoleAsync(user, RoleType.User.ToString());
-                    var token = CreateToken(user, new List<string> { RoleType.User.ToString() });
-                    return new Result { StatusCode = 200, Body = new { Token = token } };
+                    var token = CreateToken(user, new List<string> { RoleType.User.ToString() }, isAdmin: false);
+                    return new Result { StatusCode = 200, Body = new { Token = token, User = new { UserId = user.Id, user.Name, IsAdmin = false } } };
                 }
 
                 return new Result { StatusCode = 400, Body = new { Message = result.Errors.First().Description } };
@@ -102,9 +104,9 @@ namespace Service.Services
             }
         }
 
-        private string CreateToken(ApplicationUser user, IList<string> userRoles)
+        private string CreateToken(ApplicationUser user, IList<string> userRoles, bool isAdmin)
         {
-            bool isAdmin = userRoles.Any(r => string.Equals(r, UserRole.Admin));
+            
             var authClaims = new List<Claim>
                 {
                     new Claim(AppClaim.Name, user.Name),
